@@ -3,6 +3,7 @@
 type Mutation {
   createItem(data: ItemCreateInput): Item!
   updateItem(data: ItemUpdateInput, where: ItemWhereUniqueInput!): Item!
+  deleteItem(where: ItemWhereUniqueInput!): Item
 }
 
 type Query {

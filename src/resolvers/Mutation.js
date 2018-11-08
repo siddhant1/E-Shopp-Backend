@@ -20,6 +20,14 @@ const mutations = {
       },
       info
     );
+  },
+  deleteItem(parent, { where }, { db }, info) {
+    return db.mutation.deleteItem(
+      {
+        where
+      },
+      info
+    );
   }
 };
 
