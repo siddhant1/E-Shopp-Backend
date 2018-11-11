@@ -1,5 +1,5 @@
 # source: https://us1.prisma.sh/siddhant-b7cdde/sick-fits/dev
-# timestamp: Tue Nov 06 2018 18:41:49 GMT+0530 (India Standard Time)
+# timestamp: Sun Nov 11 2018 16:44:24 GMT+0530 (India Standard Time)
 
 type AggregateItem {
   count: Int!
@@ -468,6 +468,14 @@ type PageInfo {
   endCursor: String
 }
 
+enum Permission {
+  ADMIN
+  USER
+  ITEMCREATE
+  ITEMUPDATE
+  PERMISSIONUPDATE
+}
+
 type Query {
   users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
   items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Item]!
@@ -492,6 +500,10 @@ type User implements Node {
   id: ID!
   name: String!
   email: String!
+  password: String!
+  refreshToken: String
+  refreshTokenExpiry: Float
+  permissions: [Permission!]!
 }
 
 """A connection to a list of items."""
@@ -507,6 +519,14 @@ type UserConnection {
 input UserCreateInput {
   name: String!
   email: String!
+  password: String!
+  refreshToken: String
+  refreshTokenExpiry: Float
+  permissions: UserCreatepermissionsInput
+}
+
+input UserCreatepermissionsInput {
+  set: [Permission!]
 }
 
 """An edge in a connection."""
@@ -525,6 +545,12 @@ enum UserOrderByInput {
   name_DESC
   email_ASC
   email_DESC
+  password_ASC
+  password_DESC
+  refreshToken_ASC
+  refreshToken_DESC
+  refreshTokenExpiry_ASC
+  refreshTokenExpiry_DESC
   updatedAt_ASC
   updatedAt_DESC
   createdAt_ASC
@@ -535,6 +561,10 @@ type UserPreviousValues {
   id: ID!
   name: String!
   email: String!
+  password: String!
+  refreshToken: String
+  refreshTokenExpiry: Float
+  permissions: [Permission!]!
 }
 
 type UserSubscriptionPayload {
@@ -579,11 +609,23 @@ input UserSubscriptionWhereInput {
 input UserUpdateInput {
   name: String
   email: String
+  password: String
+  refreshToken: String
+  refreshTokenExpiry: Float
+  permissions: UserUpdatepermissionsInput
 }
 
 input UserUpdateManyMutationInput {
   name: String
   email: String
+  password: String
+  refreshToken: String
+  refreshTokenExpiry: Float
+  permissions: UserUpdatepermissionsInput
+}
+
+input UserUpdatepermissionsInput {
+  set: [Permission!]
 }
 
 input UserWhereInput {
@@ -715,8 +757,111 @@ input UserWhereInput {
 
   """All values not ending with the given string."""
   email_not_ends_with: String
+  password: String
+
+  """All values that are not equal to given value."""
+  password_not: String
+
+  """All values that are contained in given list."""
+  password_in: [String!]
+
+  """All values that are not contained in given list."""
+  password_not_in: [String!]
+
+  """All values less than the given value."""
+  password_lt: String
+
+  """All values less than or equal the given value."""
+  password_lte: String
+
+  """All values greater than the given value."""
+  password_gt: String
+
+  """All values greater than or equal the given value."""
+  password_gte: String
+
+  """All values containing the given string."""
+  password_contains: String
+
+  """All values not containing the given string."""
+  password_not_contains: String
+
+  """All values starting with the given string."""
+  password_starts_with: String
+
+  """All values not starting with the given string."""
+  password_not_starts_with: String
+
+  """All values ending with the given string."""
+  password_ends_with: String
+
+  """All values not ending with the given string."""
+  password_not_ends_with: String
+  refreshToken: String
+
+  """All values that are not equal to given value."""
+  refreshToken_not: String
+
+  """All values that are contained in given list."""
+  refreshToken_in: [String!]
+
+  """All values that are not contained in given list."""
+  refreshToken_not_in: [String!]
+
+  """All values less than the given value."""
+  refreshToken_lt: String
+
+  """All values less than or equal the given value."""
+  refreshToken_lte: String
+
+  """All values greater than the given value."""
+  refreshToken_gt: String
+
+  """All values greater than or equal the given value."""
+  refreshToken_gte: String
+
+  """All values containing the given string."""
+  refreshToken_contains: String
+
+  """All values not containing the given string."""
+  refreshToken_not_contains: String
+
+  """All values starting with the given string."""
+  refreshToken_starts_with: String
+
+  """All values not starting with the given string."""
+  refreshToken_not_starts_with: String
+
+  """All values ending with the given string."""
+  refreshToken_ends_with: String
+
+  """All values not ending with the given string."""
+  refreshToken_not_ends_with: String
+  refreshTokenExpiry: Float
+
+  """All values that are not equal to given value."""
+  refreshTokenExpiry_not: Float
+
+  """All values that are contained in given list."""
+  refreshTokenExpiry_in: [Float!]
+
+  """All values that are not contained in given list."""
+  refreshTokenExpiry_not_in: [Float!]
+
+  """All values less than the given value."""
+  refreshTokenExpiry_lt: Float
+
+  """All values less than or equal the given value."""
+  refreshTokenExpiry_lte: Float
+
+  """All values greater than the given value."""
+  refreshTokenExpiry_gt: Float
+
+  """All values greater than or equal the given value."""
+  refreshTokenExpiry_gte: Float
 }
 
 input UserWhereUniqueInput {
   id: ID
+  email: String
 }

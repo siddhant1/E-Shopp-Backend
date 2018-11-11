@@ -1,7 +1,11 @@
 type User {
   id: ID! @unique
   name: String!
-  email: String!
+  email: String! @unique
+  password:String!
+  refreshToken:String
+  refreshTokenExpiry:Float
+  permissions:[Permission]
 }
 type Item {
   id: ID! @unique
@@ -13,4 +17,13 @@ type Item {
   createdAt: DateTime!
   updatedAt: DateTime!
   # user: User!
+}
+
+
+enum Permission{
+  ADMIN
+  USER
+  ITEMCREATE
+  ITEMUPDATE
+  PERMISSIONUPDATE
 }
