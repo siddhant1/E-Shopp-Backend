@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { randomBytes } = require("crypto");
+const { promisify } = require("util");
 const mutations = {
   createItem(parent, { data }, { db }, info) {
     //TODO : Check if they are logged in
@@ -90,6 +92,70 @@ const mutations = {
     return {
       message: "signedOut"
     };
+  },
+  async requestReset(parent, { email }, ctx, info) {
+    const user = await ctx.db.query.user({
+      where: {
+        email
+      }
+    });
+    if (!user) {
+      throw new Error("User Not found");
+    }
+    const resetToken = (await promisify(randomBytes)(20)).toString("hex");
+    const res = await ctx.db.mutation.updateUser({
+      where: { email },
+      data: {
+        refreshToken: resetToken,
+        refreshTokenExpiry: Date.now() + 3600000
+      }
+    });
+    console.log(res);
+    return { message: "Success" };
+  },
+  async resetPassword(
+    parent,
+    { refreshToken, newPassword, confirmPassword },
+    ctx,
+    info
+  ) {
+    if (newPassword !== confirmPassword) {
+      throw new Error("passwords dont match");
+    }
+    const [user] = await ctx.db.query.users({
+      where: {
+        refreshToken,
+        refreshTokenExpiry_gte: Date.now() - 3600000
+      }
+    });
+    if (!user) {
+      throw new Error("refresh token is either invalid or expired");
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await ctx.db.mutation.updateUser({
+      where: {
+        id: user.id
+      },
+      data: {
+        password: hashedPassword,
+        refreshToken: null,
+        refreshTokenExpiry: null
+      }
+    });
+    //generate JWT
+    const token = jwt.sign({ Userid: user.id }, process.env.APP_SECRET);
+    //SET cookie
+    ctx.response.cookie(
+      "token",
+      token,
+      {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 365
+      },
+      info
+    );
+    //return the user
+    return updatedUser;
   }
 };
 
