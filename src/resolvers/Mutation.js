@@ -4,11 +4,22 @@ const { randomBytes } = require("crypto");
 const { promisify } = require("util");
 const { createResetMessage, transport } = require("../mail");
 const mutations = {
-  createItem(parent, { data }, { db }, info) {
+  createItem(parent, { data }, { db, request }, info) {
     //TODO : Check if they are logged in
+    if (!request.Userid) {
+      throw new Error("Not logged in");
+    }
+    console.log(request.Userid);
     return db.mutation.createItem(
       {
-        data
+        data: {
+          ...data,
+          user: {
+            connect: {
+              id: request.Userid
+            }
+          }
+        }
       },
       info
     );
@@ -65,7 +76,7 @@ const mutations = {
     const user = await ctx.db.query.user({
       where: { email }
     });
-    if (!email) {
+    if (!user) {
       throw new Error("Unable to login");
     }
     //check pass

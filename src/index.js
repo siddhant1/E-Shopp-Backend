@@ -1,6 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const db = require("./db");
 
 const createServer = require("./createServer");
 
@@ -15,6 +16,16 @@ server.express.use((req, res, next) => {
   req.Userid = Userid;
   next();
 });
+//Populate the user itself
+server.express.use(async (req, res, next) => {
+  if (!req.Userid) return next();
+  const user = await db.query.user({
+    where: { id: req.Userid }
+  },'{id name email permissions}');
+  req.user = user;
+  next();
+});
+
 server.start(
   {
     cors: {

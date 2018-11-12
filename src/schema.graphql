@@ -6,6 +6,15 @@ type User {
   email: String!
   permissions: [Permission!]!
 }
+
+input ItemCreateInput {
+  title: String!
+  description: String!
+  image: String
+  largeImage: String
+  price: Int!
+}
+
 type Mutation {
   createItem(data: ItemCreateInput): Item!
   updateItem(data: ItemUpdateInput, where: ItemWhereUniqueInput!): Item!
@@ -22,6 +31,7 @@ type Mutation {
 }
 
 type Query {
+  users: [User!]!
   items(
     where: ItemWhereInput
     orderBy: ItemOrderByInput
