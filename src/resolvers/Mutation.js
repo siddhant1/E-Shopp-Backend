@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { randomBytes } = require("crypto");
+const { hasPermission } = require("../utils");
 const { promisify } = require("util");
 const { createResetMessage, transport } = require("../mail");
 const mutations = {
@@ -178,6 +179,20 @@ const mutations = {
     );
     //return the user
     return updatedUser;
+  },
+  async updatePermissions(parent, args, ctx, info) {
+    if (!ctx.request.Userid) {
+      throw new Error("Not Logged in");
+    }
+    const user = ctx.request.user;
+    hasPermission(user, ["ADMIN", "PERMISSIONUPDATE"]);
+    return ctx.db.mutation.updateUser(
+      {
+        data: { permissions: { set: args.permissions } },
+        where: { id: args.userId }
+      },
+      info
+    );
   }
 };
 
