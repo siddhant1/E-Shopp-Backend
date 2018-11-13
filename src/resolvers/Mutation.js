@@ -25,26 +25,66 @@ const mutations = {
       info
     );
   },
-  updateItem(parent, { data, where }, { db }, info) {
-    const updates = data;
+  async updateItem(parent, { data, where }, { db,request }, info) {
+    const updates = { ...data };
     delete updates.id;
-    return db.mutation.updateItem(
-      {
-        data: updates,
-        where: {
-          id: where.id
-        }
-      },
-      info
-    );
-  },
-  deleteItem(parent, { where }, { db }, info) {
-    return db.mutation.deleteItem(
+    //Check if the user is logged in?
+    if (!request.Userid) {
+      throw new Error("Please Login ");
+    }
+    //Check if the user is the maker of the item
+    const item = await db.query.item(
       {
         where
       },
-      info
+      "{ id  user { id name }}"
     );
+    const isOwned = item.user.id === request.Userid;
+    const canUpdate = request.user.permissions.some(permission => {
+      return ["ADMIN", "ITEMDELETE"].includes(permission);
+    });
+    if (isOwned || canUpdate) {
+      return db.mutation.updateItem(
+        {
+          data: updates,
+          where: {
+            id: where.id
+          }
+        },
+        info
+      );
+    } else {
+      throw new Error("Unauthorized");
+    }
+  },
+  async deleteItem(parent, { where }, { db, request }, info) {
+    //Check if the user is logged in
+    if (!request.Userid) {
+      throw new Error("Please Login ");
+    }
+    const item = await db.query.item(
+      {
+        where
+      },
+      "{ id  user { id name }}"
+    );
+    //Check if the user owns the item
+    const isOwned = item.user.id === request.Userid;
+    //Check if the user has the permission
+    const canDelete = request.user.permissions.some(permission => {
+      return ["ADMIN", "ITEMDELETE"].includes(permission);
+    });
+    //if either of them is true delete the item
+    if (isOwned || canDelete) {
+      return db.mutation.deleteItem(
+        {
+          where
+        },
+        info
+      );
+    } else {
+      throw new Error("You are not authorized to delete this item");
+    }
   },
   async signup(
     parent,
