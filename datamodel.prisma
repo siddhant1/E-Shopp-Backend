@@ -6,7 +6,7 @@ type User {
   refreshToken: String
   refreshTokenExpiry: Float
   permissions: [Permission]
-  
+  cart: [CartItem!]!
 }
 type Item {
   id: ID! @unique
@@ -19,7 +19,12 @@ type Item {
   updatedAt: DateTime!
   user: User!
 }
-
+type CartItem {
+  id: ID! @unique
+  quantity: Int! @default(value: 1)
+  item: Item!
+  user: User!
+}
 enum Permission {
   ADMIN
   USER

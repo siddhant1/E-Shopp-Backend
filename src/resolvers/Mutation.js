@@ -25,7 +25,7 @@ const mutations = {
       info
     );
   },
-  async updateItem(parent, { data, where }, { db,request }, info) {
+  async updateItem(parent, { data, where }, { db, request }, info) {
     const updates = { ...data };
     delete updates.id;
     //Check if the user is logged in?
@@ -233,6 +233,46 @@ const mutations = {
       },
       info
     );
+  },
+  async addToCart(parent, { itemId }, ctx, info) {
+    //Check if the user is logged in
+    if (!ctx.request.Userid) {
+      throw new Error("Please Log In");
+    }
+    //Query the current user has already put this item
+    const [ExistingItemInCart] = await ctx.db.query.cartItems({
+      where: {
+        user: { id: ctx.request.Userid },
+        item: { id: itemId }
+      }
+    });
+    if (ExistingItemInCart) {
+      return ctx.db.mutation.updateCartItem(
+        {
+          where: { id: ExistingItemInCart.id },
+          data: {
+            quantity: ExistingItemInCart.quantity + 1
+          }
+        },
+        info
+      );
+    } else {
+      return ctx.db.mutation.createCartItem(
+        {
+          data: {
+            user: {
+              connect: {
+                id: ctx.request.Userid
+              }
+            },
+            item: {
+              connect: { id: itemId }
+            }
+          }
+        },
+        info
+      );
+    }
   }
 };
 
