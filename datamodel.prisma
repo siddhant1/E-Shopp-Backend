@@ -25,6 +25,28 @@ type CartItem {
   item: Item
   user: User!
 }
+
+type OrderItem {
+  id: ID! @unique
+  title: String!
+  description: String!
+  image: String
+  price: Int!
+  quantity: Int! @default(value: 1)
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User
+}
+
+type Order {
+  id: ID! @unique
+  items: [OrderItem!]!
+  total: Int!
+  user: User!
+  charge: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
 enum Permission {
   ADMIN
   USER
