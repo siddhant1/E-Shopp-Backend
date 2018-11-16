@@ -273,6 +273,34 @@ const mutations = {
         info
       );
     }
+  },
+  async removeFromCart(parent, { id }, ctx, info) {
+    //Check id they are logged in
+    if (!ctx.request.Userid) {
+      throw new Error("Please log in");
+    }
+
+    //Find the cart item
+    const CartItem =await ctx.db.query.cartItem(
+      {
+        where: {
+          id
+        }
+      },
+      "{id user {id}}"
+    );
+    if (!CartItem) {
+      throw new Error("No item found");
+    }
+    if (CartItem.user.id !== ctx.request.Userid) {
+      throw new Error("Delete your items please");
+    }
+    return ctx.db.mutation.deleteCartItem(
+      {
+        where: { id }
+      },
+      info
+    );
   }
 };
 
